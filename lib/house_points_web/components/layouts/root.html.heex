@@ -31,6 +31,78 @@
     </script>
   </head>
   <body>
-    {@inner_content}
+    <!-- Navbar -->
+    <div class="navbar bg-base-100 shadow-lg">
+      <div class="flex-1">
+        <a href="/" class="btn btn-ghost text-xl">
+          <span class="text-3xl">🏰</span>
+          House Points
+        </a>
+      </div>
+
+      <%= if assigns[:current_user] do %>
+        <div class="flex-none gap-2">
+          <!-- Navigation Links -->
+          <div class="hidden lg:flex">
+            <ul class="menu menu-horizontal px-1">
+              <li><a href="/leaderboard" class="btn btn-ghost">🏆 Leaderboard</a></li>
+              <li><a href="/award" class="btn btn-ghost">⭐ Award Points</a></li>
+              <li><a href="/recap" class="btn btn-ghost">📊 Recap</a></li>
+            </ul>
+          </div>
+
+          <!-- User Profile Dropdown -->
+          <div class="dropdown dropdown-end">
+            <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+              <div class="w-10 rounded-full">
+                <div class="bg-neutral text-neutral-content rounded-full w-10 h-10 flex items-center justify-center">
+                  <%= String.first(@current_user.name) %>
+                </div>
+              </div>
+            </div>
+            <ul tabindex="0" class="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow">
+              <li class="menu-title">
+                <span class="text-sm font-medium"><%= @current_user.name %></span>
+                <%= if @current_user.house do %>
+                  <span class="text-xs text-base-content/70">
+                    <%= case @current_user.house.name do %>
+                      <% "Gryffindor" -> %>🦁
+                      <% "Hufflepuff" -> %>🦡
+                      <% "Ravenclaw" -> %>🦅
+                      <% "Slytherin" -> %>🐍
+                      <% _ -> %>🏠
+                    <% end %> <%= @current_user.house.name %>
+                  </span>
+                <% end %>
+              </li>
+              <li><a href="/leaderboard" class="lg:hidden">🏆 Leaderboard</a></li>
+              <li><a href="/award" class="lg:hidden">⭐ Award Points</a></li>
+              <li><a href="/recap" class="lg:hidden">📊 Recap</a></li>
+              <li><hr /></li>
+              <li><a href="/admin">⚙️ Admin</a></li>
+              <li>
+                <form action="/auth/logout" method="post">
+                  <input type="hidden" name="_method" value="delete" />
+                  <input type="hidden" name="_csrf_token" value={get_csrf_token()} />
+                  <button type="submit" class="w-full text-left">🚪 Sign Out</button>
+                </form>
+              </li>
+            </ul>
+          </div>
+        </div>
+      <% else %>
+        <div class="flex-none">
+          <a href="/auth" class="btn btn-primary">
+            Sign In
+          </a>
+        </div>
+      <% end %>
+    </div>
+
+    <main class="min-h-screen">
+      {@inner_content}
+    </main>
+
+    <.flash_group flash={@flash} />
   </body>
 </html>

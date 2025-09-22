@@ -3,6 +3,8 @@ defmodule HousePointsWeb.LeaderboardDashboardLive do
 
   alias HousePoints.{Recognition, Directory}
 
+  on_mount {HousePointsWeb.AuthPlug, :require_authenticated_user}
+
   @impl true
   def mount(_params, _session, socket) do
     if connected?(socket) do

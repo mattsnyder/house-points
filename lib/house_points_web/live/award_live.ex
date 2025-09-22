@@ -5,13 +5,12 @@ defmodule HousePointsWeb.AwardLive do
   alias HousePoints.{Recognition, Directory}
   alias HousePoints.Recognition.Award
 
+  on_mount {HousePointsWeb.AuthPlug, :require_authenticated_user}
+
   @impl true
   def mount(_params, _session, socket) do
     changeset = Award.changeset(%Award{}, %{})
-
-    # For demo purposes, we'll use the first member as the current user
-    # In a real app, this would come from session/auth
-    current_user = Directory.list_members() |> List.first()
+    current_user = socket.assigns.current_user
 
     socket =
       socket
@@ -19,7 +18,6 @@ defmodule HousePointsWeb.AwardLive do
       |> assign(:form, to_form(changeset))
       |> assign(:members, Directory.list_members())
       |> assign(:traits, Directory.list_traits())
-      |> assign(:current_user, current_user)
       |> assign(:daily_points_given, get_daily_points_given(current_user))
       |> assign(:daily_limit, get_daily_limit())
 
@@ -330,13 +328,13 @@ defmodule HousePointsWeb.AwardLive do
 
   defp receiver_options(members, current_user) do
     members
-    |> Enum.reject(&(&1.id == current_user&.id))  # Exclude current user
+    |> Enum.reject(&(&1.id == (current_user && current_user.id)))  # Exclude current user
     |> Enum.map(&{"#{&1.name} (#{&1.house.name})", &1.id})
   end
 
   defp trait_options(traits) do
     traits
-    |> Enum.sort_by(&(&1.house&.name || ""))
+    |> Enum.sort_by(&((&1.house && &1.house.name) || ""))
     |> Enum.map(&{"#{trait_emoji(&1.name)} #{&1.name} - #{&1.description}", &1.id})
   end
 

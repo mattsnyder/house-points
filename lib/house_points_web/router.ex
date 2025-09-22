@@ -17,7 +17,12 @@ defmodule HousePointsWeb.Router do
   scope "/", HousePointsWeb do
     pipe_through :browser
 
-    # Redirect root to leaderboard
+    # Authentication routes
+    live "/auth", AuthLive, :index
+    get "/auth/callback", AuthController, :callback
+    live "/auth/house-selection", HouseSelectionLive, :index
+
+    # Redirect root to leaderboard (will redirect to auth if not logged in)
     live "/", LeaderboardDashboardLive, :index
 
     # Main application routes

@@ -86,3 +86,9 @@ config :phoenix_live_view,
 
 # Disable swoosh api client as it is only required for production adapters.
 config :swoosh, :api_client, false
+
+# Microsoft Auth Configuration
+config :elixir_auth_microsoft,
+  client_id: System.get_env("MICROSOFT_CLIENT_ID") || "your-microsoft-client-id",
+  client_secret: System.get_env("MICROSOFT_CLIENT_SECRET") || "your-microsoft-client-secret",
+  tenant_id: System.get_env("MICROSOFT_TENANT_ID") || "common"

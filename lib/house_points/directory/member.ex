@@ -36,8 +36,8 @@ defmodule HousePoints.Directory.Member do
   """
   def registration_changeset(member, attrs) do
     member
-    |> cast(attrs, [:name, :email, :password, :password_confirmation, :first_name, :last_name])
-    |> validate_required([:name, :email, :password])
+    |> cast(attrs, [:name, :email, :password, :password_confirmation, :house_id, :first_name, :last_name])
+    |> validate_required([:name, :email, :password, :house_id])
     |> validate_email(:email)
     |> validate_length(:password, min: 8, message: "must be at least 8 characters")
     |> validate_confirmation(:password, message: "does not match password")

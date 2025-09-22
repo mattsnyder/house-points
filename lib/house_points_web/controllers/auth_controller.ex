@@ -40,10 +40,10 @@ defmodule HousePointsWeb.AuthController do
         conn =
           conn
           |> put_session(:current_user_id, member.id)
-          |> put_flash(:info, "Welcome to House Points, #{member.name}! Please select your house.")
+          |> put_flash(:info, "Welcome to House Points, #{member.name}!")
 
         conn
-        |> redirect(to: ~p"/auth/house-selection")
+        |> redirect(to: ~p"/leaderboard")
 
       {:error, changeset} ->
         # Extract error messages from changeset

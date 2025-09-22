@@ -1,7 +1,7 @@
 defmodule HousePointsWeb.AuthLive do
   use HousePointsWeb, :live_view
 
-  alias HousePoints.{Auth, Directory.Member}
+  alias HousePoints.{Auth, Directory.Member, Directory}
 
   on_mount {HousePointsWeb.AuthPlug, :assign_current_user}
 
@@ -20,13 +20,16 @@ defmodule HousePointsWeb.AuthLive do
       # Check if we should show signup or login mode
       mode = Map.get(params, "mode", "login")
 
+      houses = Directory.list_houses()
+
       socket =
         socket
         |> assign(:current_user, current_user)
         |> assign(:page_title, "Welcome to House Points")
         |> assign(:mode, mode)
+        |> assign(:houses, houses)
         |> assign(:login_form, to_form(Member.login_changeset(%Member{}, %{}), as: :member))
-        |> assign(:signup_form, to_form(Member.registration_changeset(%Member{}, %{}), as: :member))
+        |> assign(:signup_form, to_form(Member.registration_changeset(%Member{}, %{house_id: nil}), as: :member))
 
       {:ok, socket}
     end
@@ -144,6 +147,21 @@ defmodule HousePointsWeb.AuthLive do
                         <span class="label-text font-semibold">Confirm Password <span class="text-error">*</span></span>
                       </label>
                       <.input field={@signup_form[:password_confirmation]} type="password" placeholder="Confirm your password" required />
+                    </div>
+
+                    <div class="form-control">
+                      <label class="label">
+                        <span class="label-text font-semibold">Select Your House <span class="text-error">*</span></span>
+                      </label>
+                      <.input field={@signup_form[:house_id]} type="select" prompt="Choose your house..." options={Enum.map(@houses, fn house ->
+                        {case house.name do
+                          "Gryffindor" -> "🦁 Gryffindor"
+                          "Hufflepuff" -> "🦡 Hufflepuff"
+                          "Ravenclaw" -> "🦅 Ravenclaw"
+                          "Slytherin" -> "🐍 Slytherin"
+                          _ -> "🏠 #{house.name}"
+                        end, house.id}
+                      end)} required />
                     </div>
 
                     <div class="form-control mt-6">

@@ -4,9 +4,10 @@ defmodule HousePoints.Directory.Member do
 
   schema "members" do
     field :name, :string
-    field :microsoft_id, :string
     field :email, :string
-    field :avatar_url, :string
+    field :password, :string, virtual: true, redact: true
+    field :password_confirmation, :string, virtual: true, redact: true
+    field :hashed_password, :string, redact: true
     field :first_name, :string
     field :last_name, :string
     field :is_active, :boolean, default: true
@@ -23,25 +24,36 @@ defmodule HousePoints.Directory.Member do
   @doc false
   def changeset(member, attrs) do
     member
-    |> cast(attrs, [:name, :house_id, :microsoft_id, :email, :avatar_url, :first_name, :last_name, :is_active, :last_sign_in_at])
-    |> validate_required([:name])
+    |> cast(attrs, [:name, :house_id, :email, :first_name, :last_name, :is_active, :last_sign_in_at])
+    |> validate_required([:name, :email])
     |> validate_email(:email)
     |> unique_constraint(:name)
-    |> unique_constraint(:microsoft_id)
     |> unique_constraint(:email)
   end
 
   @doc """
-  Changeset for creating a member from Microsoft auth data
+  Changeset for user registration with email/password
   """
-  def auth_changeset(member, attrs) do
+  def registration_changeset(member, attrs) do
     member
-    |> cast(attrs, [:microsoft_id, :email, :avatar_url, :first_name, :last_name, :name, :last_sign_in_at])
-    |> validate_required([:microsoft_id, :email, :name])
+    |> cast(attrs, [:name, :email, :password, :password_confirmation, :first_name, :last_name])
+    |> validate_required([:name, :email, :password])
     |> validate_email(:email)
-    |> unique_constraint(:microsoft_id)
+    |> validate_length(:password, min: 8, message: "must be at least 8 characters")
+    |> validate_confirmation(:password, message: "does not match password")
     |> unique_constraint(:email)
-    |> put_change(:is_active, true)
+    |> unique_constraint(:name)
+    |> hash_password()
+  end
+
+  @doc """
+  Changeset for user login
+  """
+  def login_changeset(member, attrs) do
+    member
+    |> cast(attrs, [:email, :password])
+    |> validate_required([:email, :password])
+    |> validate_email(:email)
   end
 
   @doc """
@@ -57,4 +69,28 @@ defmodule HousePoints.Directory.Member do
     changeset
     |> validate_format(field, ~r/^[^\s]+@[^\s]+\.[^\s]+$/, message: "must be a valid email")
   end
+
+  defp hash_password(changeset) do
+    case get_change(changeset, :password) do
+      nil ->
+        changeset
+      password ->
+        changeset
+        |> put_change(:hashed_password, Bcrypt.hash_pwd_salt(password))
+        |> delete_change(:password)
+    end
+  end
+
+  @doc """
+  Verifies the password against the hashed password
+  """
+  def verify_password(member, password) do
+    Bcrypt.verify_pass(password, member.hashed_password)
+  end
+
+  @doc """
+  Returns true if the member needs to select a house
+  """
+  def needs_house_selection?(%__MODULE__{house_id: nil}), do: true
+  def needs_house_selection?(%__MODULE__{}), do: false
 end

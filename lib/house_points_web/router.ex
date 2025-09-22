@@ -19,7 +19,9 @@ defmodule HousePointsWeb.Router do
 
     # Authentication routes
     live "/auth", AuthLive, :index
-    get "/auth/callback", AuthController, :callback
+    post "/auth/login", AuthController, :login
+    post "/auth/register", AuthController, :register
+    delete "/auth/logout", AuthController, :logout
     live "/auth/house-selection", HouseSelectionLive, :index
 
     # Redirect root to leaderboard (will redirect to auth if not logged in)

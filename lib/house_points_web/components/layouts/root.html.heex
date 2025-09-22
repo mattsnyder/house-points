@@ -41,17 +41,17 @@
       </div>
 
       <%= if assigns[:current_user] do %>
-        <div class="flex-none gap-2">
-          <!-- Navigation Links -->
-          <div class="hidden lg:flex">
-            <ul class="menu menu-horizontal px-1">
-              <li><a href="/leaderboard" class="btn btn-ghost">🏆 Leaderboard</a></li>
-              <li><a href="/award" class="btn btn-ghost">⭐ Award Points</a></li>
-              <li><a href="/recap" class="btn btn-ghost">📊 Recap</a></li>
-            </ul>
-          </div>
+        <!-- Navigation Links -->
+        <div class="flex-none hidden lg:flex">
+          <ul class="menu menu-horizontal px-1">
+            <li><a href="/leaderboard" class="btn btn-ghost">🏆 Leaderboard</a></li>
+            <li><a href="/award" class="btn btn-ghost">⭐ Award Points</a></li>
+            <li><a href="/recap" class="btn btn-ghost">📊 Recap</a></li>
+          </ul>
+        </div>
 
-          <!-- User Profile Dropdown -->
+        <!-- User Profile Dropdown -->
+        <div class="flex-none">
           <div class="dropdown dropdown-end">
             <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
               <div class="w-10 rounded-full">

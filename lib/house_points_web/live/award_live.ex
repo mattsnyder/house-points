@@ -9,8 +9,12 @@ defmodule HousePointsWeb.AwardLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    changeset = Award.changeset(%Award{}, %{})
+    changeset = Award.form_changeset(%Award{}, %{})
     current_user = socket.assigns.current_user
+
+    daily_points_given = get_daily_points_given(current_user)
+    daily_limit = get_daily_limit()
+    remaining_points = daily_limit - daily_points_given
 
     socket =
       socket
@@ -18,8 +22,10 @@ defmodule HousePointsWeb.AwardLive do
       |> assign(:form, to_form(changeset))
       |> assign(:members, Directory.list_members())
       |> assign(:traits, Directory.list_traits())
-      |> assign(:daily_points_given, get_daily_points_given(current_user))
-      |> assign(:daily_limit, get_daily_limit())
+      |> assign(:daily_points_given, daily_points_given)
+      |> assign(:daily_limit, daily_limit)
+      |> assign(:remaining_points, remaining_points)
+      |> assign(:show_limit_warning, false)
 
     {:ok, socket}
   end
@@ -36,8 +42,14 @@ defmodule HousePointsWeb.AwardLive do
 
     changeset =
       %Award{}
-      |> Award.changeset(award_params)
+      |> Award.form_changeset(award_params)
       |> Map.put(:action, :validate)
+
+    # Debug: Log changeset state
+    IO.puts("=== VALIDATION DEBUG ===")
+    IO.puts("Award params: #{inspect(award_params)}")
+    IO.puts("Changeset valid?: #{changeset.valid?}")
+    IO.puts("Changeset errors: #{inspect(changeset.errors)}")
 
     # Check daily limit warning
     points = case Integer.parse(award_params["points"] || "0") do
@@ -70,7 +82,7 @@ defmodule HousePointsWeb.AwardLive do
         "reason" => get_quick_reason(trait_name)
       }
 
-      changeset = Award.changeset(%Award{}, award_params)
+      changeset = Award.form_changeset(%Award{}, award_params)
 
       socket =
         socket
@@ -130,7 +142,7 @@ defmodule HousePointsWeb.AwardLive do
         <%= if @current_user do %>
           <p class="text-lg">Welcome, <strong><%= @current_user.name %></strong>!</p>
           <div class="badge badge-info">
-            <%= @remaining_points %> / <%= @daily_limit %> points remaining today
+            <%= Map.get(assigns, :remaining_points, @daily_limit - @daily_points_given) %> / <%= @daily_limit %> points remaining today
           </div>
         <% end %>
       </div>
@@ -237,7 +249,7 @@ defmodule HousePointsWeb.AwardLive do
                   </div>
                   <div class="stat">
                     <div class="stat-title text-primary-content/70">Remaining</div>
-                    <div class="stat-value text-2xl"><%= @remaining_points %></div>
+                    <div class="stat-value text-2xl"><%= Map.get(assigns, :remaining_points, @daily_limit - @daily_points_given) %></div>
                   </div>
                 </div>
                 <progress class="progress progress-primary bg-primary-content/20" value={@daily_points_given} max={@daily_limit}></progress>

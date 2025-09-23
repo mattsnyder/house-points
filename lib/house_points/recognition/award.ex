@@ -24,4 +24,16 @@ defmodule HousePoints.Recognition.Award do
     |> validate_number(:points, greater_than: 0, less_than_or_equal_to: 50)
     |> validate_length(:reason, min: 5, max: 500)
   end
+
+  @doc """
+  Changeset for client-side form validation. Does not require receiver_house_id
+  since it will be set server-side based on the receiver.
+  """
+  def form_changeset(award, attrs) do
+    award
+    |> cast(attrs, [:points, :reason, :giver_id, :receiver_id, :trait_id])
+    |> validate_required([:points, :reason, :giver_id, :receiver_id, :trait_id])
+    |> validate_number(:points, greater_than: 0, less_than_or_equal_to: 50)
+    |> validate_length(:reason, min: 5, max: 500)
+  end
 end

@@ -221,11 +221,13 @@ defmodule HousePointsWeb.LeaderboardDashboardLive do
   defp get_enriched_house_data do
     house_totals = Recognition.totals_by_house()
 
-    Enum.map(house_totals, fn {house_name, total_points} ->
-      member_count = Directory.count_members_by_house(house_name)
+    Enum.map(house_totals, fn %{house_id: house_id, total_points: total_points} ->
+      # Get house name from house_id
+      house = Directory.get_house!(house_id)
+      member_count = Directory.count_members_by_house(house.name)
 
       %{
-        house_name: house_name,
+        house_name: house.name,
         total_points: total_points,
         member_count: member_count
       }

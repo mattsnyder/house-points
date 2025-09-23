@@ -140,12 +140,12 @@ defmodule HousePointsWeb.AwardLive do
       <div class="container mx-auto px-4 py-8 max-w-4xl">
         <div class="text-center mb-8">
           <h1 class="text-5xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-500">
-            ⚡ Award House Points ⚡
+            Award House Points
           </h1>
           <%= if @current_user do %>
             <p class="text-xl text-gray-300 mb-4">Greetings, <strong class="text-yellow-400"><%= @current_user.name %></strong>!</p>
             <div class="bg-gray-800/60 backdrop-blur-sm rounded-lg px-4 py-2 inline-block border border-yellow-600/30">
-              <span class="text-yellow-300">✨ <%= Map.get(assigns, :remaining_points, @daily_limit - @daily_points_given) %> / <%= @daily_limit %> points remaining today ✨</span>
+              <span class="text-yellow-300"><%= Map.get(assigns, :remaining_points, @daily_limit - @daily_points_given) %> / <%= @daily_limit %> points remaining today</span>
             </div>
           <% end %>
           <p class="text-lg text-gray-400 italic mt-4">"Help will always be given at Hogwarts to those who ask for it."</p>
@@ -155,7 +155,7 @@ defmodule HousePointsWeb.AwardLive do
         <!-- Award Form -->
         <div class="bg-gray-800/80 backdrop-blur-sm rounded-xl shadow-2xl border border-yellow-600/30">
           <div class="p-8">
-            <h2 class="text-2xl font-bold mb-6 text-yellow-400 text-center">✨ Award House Points ✨</h2>
+            <h2 class="text-2xl font-bold mb-6 text-yellow-400 text-center">Award House Points</h2>
 
             <.form for={@form} phx-change="validate" phx-submit="save">
               <%= if @current_user do %>
@@ -208,7 +208,7 @@ defmodule HousePointsWeb.AwardLive do
 
               <div class="form-control">
                 <.button type="submit" disabled={!@changeset.valid? || (assigns[:show_limit_warning] && @show_limit_warning)} class="bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 disabled:from-gray-600 disabled:to-gray-500 text-gray-900 font-bold py-3 px-6 rounded-lg w-full transition-all duration-200 shadow-lg hover:shadow-xl disabled:cursor-not-allowed">
-                  ⚡ Cast Award Spell ⚡
+                  Award Points
                 </.button>
               </div>
             </.form>
@@ -219,18 +219,20 @@ defmodule HousePointsWeb.AwardLive do
         <div class="space-y-6">
           <div class="bg-gray-800/80 backdrop-blur-sm rounded-xl shadow-2xl border border-purple-600/30">
             <div class="p-8">
-              <h2 class="text-2xl font-bold mb-4 text-purple-400 text-center">⚡ Quick Spells ⚡</h2>
-              <p class="text-sm text-gray-300 mb-6 text-center">Cast common recognition spells with a single click:</p>
+              <h2 class="text-2xl font-bold mb-4 text-purple-400 text-center">Quick Awards</h2>
+              <p class="text-sm text-gray-300 mb-6 text-center">Award common traits with a single click:</p>
 
               <div class="grid grid-cols-1 gap-3">
-                <%= for {emoji, trait, points, description} <- quick_award_options() do %>
+                <%= for {letter, trait, points, description} <- quick_award_options() do %>
                   <button
                     phx-click="quick_award"
                     phx-value-trait={trait}
                     phx-value-points={points}
                     class={"btn btn-outline text-left justify-start #{if assigns[:quick_award_selected] == trait, do: "btn-active"}"}
                   >
-                    <span class="text-2xl mr-3"><%= emoji %></span>
+                    <div class="w-10 h-10 mr-3 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+                      <%= letter %>
+                    </div>
                     <div class="text-left">
                       <div class="font-semibold"><%= trait %> (<%= points %>pts)</div>
                       <div class="text-xs opacity-70"><%= description %></div>
@@ -245,14 +247,14 @@ defmodule HousePointsWeb.AwardLive do
           <%= if @current_user do %>
             <div class="bg-gradient-to-br from-indigo-800/80 to-purple-800/80 backdrop-blur-sm rounded-xl shadow-2xl border border-indigo-500/30">
               <div class="p-6">
-                <h3 class="text-xl font-bold text-indigo-300 text-center mb-4">🔮 Your Magical Progress 🔮</h3>
+                <h3 class="text-xl font-bold text-indigo-300 text-center mb-4">Your Daily Progress</h3>
                 <div class="space-y-4">
                   <div class="text-center">
-                    <div class="text-indigo-200 text-sm uppercase tracking-wide mb-1">Magic Points Cast Today</div>
+                    <div class="text-indigo-200 text-sm uppercase tracking-wide mb-1">Points Awarded Today</div>
                     <div class="text-3xl font-bold text-indigo-400"><%= @daily_points_given %></div>
                   </div>
                   <div class="text-center">
-                    <div class="text-purple-200 text-sm uppercase tracking-wide mb-1">Spells Remaining</div>
+                    <div class="text-purple-200 text-sm uppercase tracking-wide mb-1">Points Remaining</div>
                     <div class="text-3xl font-bold text-purple-400"><%= Map.get(assigns, :remaining_points, @daily_limit - @daily_points_given) %></div>
                   </div>
                   <div class="w-full bg-gray-700 rounded-full h-3 mt-4">
@@ -330,14 +332,14 @@ defmodule HousePointsWeb.AwardLive do
 
   defp quick_award_options do
     [
-      {"🏆", "Courage", 10, "For bravery in challenging situations"},
-      {"🤝", "Teamwork", 8, "For excellent collaboration"},
-      {"💡", "Cleverness", 7, "For creative problem solving"},
-      {"🚀", "Initiative", 9, "For taking action and leading"},
-      {"💎", "Loyalty", 6, "For commitment and reliability"},
-      {"🔍", "Curiosity", 5, "For asking great questions"},
-      {"⚡", "Drive", 8, "For determination and persistence"},
-      {"🎯", "Ambition", 7, "For setting and achieving goals"}
+      {"C", "Courage", 10, "For bravery in challenging situations"},
+      {"T", "Teamwork", 8, "For excellent collaboration"},
+      {"L", "Cleverness", 7, "For creative problem solving"},
+      {"I", "Initiative", 9, "For taking action and leading"},
+      {"Y", "Loyalty", 6, "For commitment and reliability"},
+      {"U", "Curiosity", 5, "For asking great questions"},
+      {"D", "Drive", 8, "For determination and persistence"},
+      {"A", "Ambition", 7, "For setting and achieving goals"}
     ]
   end
 
@@ -354,7 +356,7 @@ defmodule HousePointsWeb.AwardLive do
   defp trait_options(traits) do
     traits
     |> Enum.sort_by(&((&1.house && &1.house.name) || ""))
-    |> Enum.map(&{"#{trait_emoji(&1.name)} #{&1.name} - #{&1.description}", &1.id})
+    |> Enum.map(&{"#{&1.name} - #{&1.description}", &1.id})
   end
 
   defp trait_emoji(trait_name) do

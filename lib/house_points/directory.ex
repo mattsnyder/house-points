@@ -71,6 +71,18 @@ defmodule HousePoints.Directory do
   end
 
   @doc """
+  Returns the count of members for a specific house by house name.
+  """
+  def count_members_by_house(house_name) do
+    from(m in Member,
+      join: h in House, on: m.house_id == h.id,
+      where: h.name == ^house_name,
+      select: count(m.id)
+    )
+    |> Repo.one()
+  end
+
+  @doc """
   Gets a single member with house preloaded.
   """
   def get_member!(id) do

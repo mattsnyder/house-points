@@ -55,6 +55,35 @@ defmodule HousePointsWeb.LeaderboardDashboardLive do
           <p class="text-sm text-gray-400 mt-2">- Professor Dumbledore</p>
         </div>
 
+        <!-- Navigation Tabs -->
+        <div class="flex justify-center mb-8">
+          <div class="bg-gray-800/60 backdrop-blur-sm rounded-xl p-2 border border-gray-600/30">
+            <div class="flex space-x-2">
+              <button
+                phx-click="switch_tab"
+                phx-value-tab="houses"
+                class={"px-6 py-3 rounded-lg font-semibold transition-all duration-200 #{if @tab == "houses", do: "bg-yellow-600 text-gray-900 shadow-lg", else: "text-gray-300 hover:text-yellow-400 hover:bg-gray-700/50"}"}
+              >
+                Houses
+              </button>
+              <button
+                phx-click="switch_tab"
+                phx-value-tab="recent"
+                class={"px-6 py-3 rounded-lg font-semibold transition-all duration-200 #{if @tab == "recent", do: "bg-purple-600 text-white shadow-lg", else: "text-gray-300 hover:text-purple-400 hover:bg-gray-700/50"}"}
+              >
+                Recent Awards
+              </button>
+              <button
+                phx-click="switch_tab"
+                phx-value-tab="traits"
+                class={"px-6 py-3 rounded-lg font-semibold transition-all duration-200 #{if @tab == "traits", do: "bg-blue-600 text-white shadow-lg", else: "text-gray-300 hover:text-blue-400 hover:bg-gray-700/50"}"}
+              >
+                Traits
+              </button>
+            </div>
+          </div>
+        </div>
+
       <div>
         <%= if @tab == "houses" do %>
           <!-- House Leaderboard -->
@@ -166,21 +195,148 @@ defmodule HousePointsWeb.LeaderboardDashboardLive do
 
 
         <%= if @tab == "traits" do %>
-          <!-- TODO: Trait leaderboard -->
-          <div class="card bg-base-100 shadow-xl">
-            <div class="card-body">
-              <h2 class="card-title">Most Recognized Traits</h2>
-              <p>Trait leaderboard implementation coming soon...</p>
+          <!-- Traits Leaderboard -->
+          <div class="bg-gray-800/80 backdrop-blur-sm rounded-xl shadow-2xl border border-blue-600/30">
+            <div class="p-8">
+              <h2 class="text-3xl font-bold mb-8 text-center text-blue-400">
+                Most Recognized Traits
+              </h2>
+              <%= if length(@trait_totals || []) > 0 do %>
+                <div class="grid md:grid-cols-2 gap-6">
+                  <%= for {trait_data, index} <- Enum.with_index(@trait_totals) do %>
+                    <div class={"relative p-6 rounded-xl border-2 shadow-lg #{trait_border_class(index)} transform hover:scale-[1.02] transition-transform duration-200"}>
+                      <div class="flex items-center justify-between">
+                        <!-- Trait Details -->
+                        <div class="flex items-center space-x-4">
+                          <!-- Rank Badge -->
+                          <div class={"w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold #{rank_badge_class(index)}"}>
+                            <%= index + 1 %>
+                          </div>
+
+                          <!-- Trait Info -->
+                          <div class="flex-1">
+                            <h3 class="text-xl font-bold text-blue-400 mb-1">
+                              <%= trait_data.trait_name %>
+                            </h3>
+                            <p class="text-sm text-gray-300 mb-2">
+                              <%= trait_data.trait_description %>
+                            </p>
+                            <div class="flex items-center space-x-4 text-sm text-gray-400">
+                              <span class="flex items-center">
+                                <span class="w-2 h-2 bg-blue-400 rounded-full mr-2"></span>
+                                <%= trait_data.award_count %> recognitions
+                              </span>
+                              <span class="flex items-center">
+                                <span class="w-2 h-2 bg-purple-400 rounded-full mr-2"></span>
+                                avg <%= Float.round(trait_data.total_points / max(trait_data.award_count, 1), 1) %> pts
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Points -->
+                        <div class="text-right">
+                          <div class="text-3xl font-bold text-blue-400 mb-1">
+                            <%= trait_data.total_points %>
+                          </div>
+                          <div class="text-sm text-gray-300">points</div>
+                        </div>
+                      </div>
+
+                      <!-- Progress Bar -->
+                      <div class="mt-4">
+                        <div class="flex justify-between text-xs text-gray-300 mb-1">
+                          <span>Recognition Level</span>
+                          <span><%= if @max_trait_points > 0, do: round(trait_data.total_points / @max_trait_points * 100), else: 0 %>%</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2">
+                          <div
+                            class="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-300"
+                            style={"width: #{if @max_trait_points > 0, do: trait_data.total_points / @max_trait_points * 100, else: 0}%"}
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+              <% else %>
+                <div class="text-center py-12">
+                  <div class="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full flex items-center justify-center">
+                    <div class="text-3xl font-bold text-blue-100">T</div>
+                  </div>
+                  <h3 class="text-2xl font-bold mt-6 mb-4 text-blue-400">No Traits Recognized Yet!</h3>
+                  <p class="text-gray-300 text-lg mb-6">Start recognizing exceptional traits in your community!</p>
+                  <a href="/award" class="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold py-3 px-8 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl">
+                    Award Points
+                  </a>
+                </div>
+              <% end %>
             </div>
           </div>
         <% end %>
 
         <%= if @tab == "recent" do %>
-          <!-- TODO: Recent awards -->
-          <div class="card bg-base-100 shadow-xl">
-            <div class="card-body">
-              <h2 class="card-title">Recent Awards</h2>
-              <p>Recent awards implementation coming soon...</p>
+          <!-- Recent Awards Feed -->
+          <div class="bg-gray-800/80 backdrop-blur-sm rounded-xl shadow-2xl border border-yellow-600/30">
+            <div class="p-8">
+              <h2 class="text-3xl font-bold mb-8 text-center text-yellow-400">
+                Recent Awards
+              </h2>
+              <%= if length(@recent_awards || []) > 0 do %>
+                <div class="space-y-4">
+                  <%= for award <- @recent_awards do %>
+                    <div class="bg-gray-700/60 backdrop-blur-sm rounded-xl p-6 border border-gray-600/30 shadow-lg">
+                      <div class="flex items-center justify-between">
+                        <!-- Award Details -->
+                        <div class="flex items-center space-x-4">
+                          <!-- House Symbol -->
+                          <div class={"w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold #{house_symbol_bg(award.receiver_house.name)}"}>
+                            <%= house_symbol(award.receiver_house.name) %>
+                          </div>
+
+                          <!-- Award Info -->
+                          <div class="flex-1">
+                            <div class="flex items-center space-x-2 mb-1">
+                              <span class="text-gray-300 font-medium"><%= award.giver.name %></span>
+                              <span class="text-gray-400">awarded</span>
+                              <span class={"font-bold #{house_text_color(award.receiver_house.name)}"}><%= award.receiver.name %></span>
+                            </div>
+                            <div class="text-sm text-gray-400 mb-2">
+                              <span class="font-semibold text-purple-400"><%= award.points %> points</span>
+                              <span class="mx-2">•</span>
+                              <span class="text-blue-400"><%= award.trait.name %></span>
+                            </div>
+                            <div class="text-sm text-gray-300 italic">
+                              "<%= award.reason %>"
+                            </div>
+                          </div>
+                        </div>
+
+                        <!-- Timestamp and Points -->
+                        <div class="text-right">
+                          <div class={"text-2xl font-bold #{house_text_color(award.receiver_house.name)} mb-1"}>
+                            +<%= award.points %>
+                          </div>
+                          <div class="text-xs text-gray-400">
+                            <%= format_time_ago(award.inserted_at) %>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+              <% else %>
+                <div class="text-center py-12">
+                  <div class="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-purple-600 to-purple-800 rounded-full flex items-center justify-center">
+                    <div class="text-3xl font-bold text-purple-100">HP</div>
+                  </div>
+                  <h3 class="text-2xl font-bold mt-6 mb-4 text-purple-400">No Awards Yet!</h3>
+                  <p class="text-gray-300 text-lg mb-6">The adventure begins with your first recognition!</p>
+                  <a href="/award" class="bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 text-white font-bold py-3 px-8 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl">
+                    Award Points
+                  </a>
+                </div>
+              <% end %>
             </div>
           </div>
         <% end %>
@@ -203,9 +359,14 @@ defmodule HousePointsWeb.LeaderboardDashboardLive do
         |> assign(:total_points_awarded, total_points)
 
       "traits" ->
-        assign(socket, :trait_totals, Recognition.totals_by_trait())
+        trait_data = get_enriched_trait_data()
+        max_points = if length(trait_data) > 0, do: hd(trait_data).total_points, else: 0
+
+        socket
+        |> assign(:trait_totals, trait_data)
+        |> assign(:max_trait_points, max_points)
       "recent" ->
-        assign(socket, :recent_awards, Recognition.recent_awards())
+        assign(socket, :recent_awards, Recognition.recent_awards(15))
       _ -> socket
     end
   end
@@ -222,6 +383,23 @@ defmodule HousePointsWeb.LeaderboardDashboardLive do
         house_name: house.name,
         total_points: total_points,
         member_count: member_count
+      }
+    end)
+    |> Enum.sort_by(& &1.total_points, :desc)
+  end
+
+  defp get_enriched_trait_data do
+    trait_totals = Recognition.totals_by_trait()
+
+    Enum.map(trait_totals, fn %{trait_id: trait_id, total_points: total_points, award_count: award_count} ->
+      # Get trait details from trait_id
+      trait = Directory.get_trait!(trait_id)
+
+      %{
+        trait_name: trait.name,
+        trait_description: trait.description,
+        total_points: total_points,
+        award_count: award_count
       }
     end)
     |> Enum.sort_by(& &1.total_points, :desc)
@@ -288,5 +466,45 @@ defmodule HousePointsWeb.LeaderboardDashboardLive do
 
   defp has_house_totals?(house_totals) do
     is_list(house_totals) and length(house_totals) > 0
+  end
+
+  defp format_time_ago(datetime) do
+    now = DateTime.utc_now()
+    diff_seconds = DateTime.diff(now, datetime, :second)
+
+    cond do
+      diff_seconds < 60 ->
+        "#{diff_seconds}s ago"
+      diff_seconds < 3600 ->
+        minutes = div(diff_seconds, 60)
+        "#{minutes}m ago"
+      diff_seconds < 86400 ->
+        hours = div(diff_seconds, 3600)
+        "#{hours}h ago"
+      diff_seconds < 604800 ->
+        days = div(diff_seconds, 86400)
+        "#{days}d ago"
+      true ->
+        weeks = div(diff_seconds, 604800)
+        "#{weeks}w ago"
+    end
+  end
+
+  defp trait_border_class(index) do
+    case index do
+      0 -> "border-blue-500 bg-gradient-to-br from-blue-900/30 to-purple-900/20 shadow-blue-500/50 shadow-2xl"
+      1 -> "border-purple-500 bg-gradient-to-br from-purple-900/30 to-blue-900/20 shadow-purple-500/50 shadow-xl"
+      2 -> "border-cyan-500 bg-gradient-to-br from-cyan-900/30 to-blue-900/20 shadow-cyan-500/50 shadow-lg"
+      _ -> "border-gray-600 bg-gray-800/20 shadow-lg"
+    end
+  end
+
+  defp rank_badge_class(index) do
+    case index do
+      0 -> "bg-gradient-to-br from-blue-400 to-blue-600 text-blue-100"
+      1 -> "bg-gradient-to-br from-purple-400 to-purple-600 text-purple-100"
+      2 -> "bg-gradient-to-br from-cyan-400 to-cyan-600 text-cyan-100"
+      _ -> "bg-gradient-to-br from-gray-500 to-gray-700 text-gray-100"
+    end
   end
 end

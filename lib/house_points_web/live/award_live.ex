@@ -136,29 +136,33 @@ defmodule HousePointsWeb.AwardLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <div class="container mx-auto px-4 py-8 max-w-4xl">
-      <div class="text-center mb-8">
-        <h1 class="text-4xl font-bold mb-2">🏆 Award Points</h1>
-        <%= if @current_user do %>
-          <p class="text-lg">Welcome, <strong><%= @current_user.name %></strong>!</p>
-          <div class="badge badge-info">
-            <%= Map.get(assigns, :remaining_points, @daily_limit - @daily_points_given) %> / <%= @daily_limit %> points remaining today
-          </div>
-        <% end %>
-      </div>
+    <div class="min-h-screen bg-gradient-to-b from-indigo-900 via-purple-900 to-gray-900">
+      <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <div class="text-center mb-8">
+          <h1 class="text-5xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-yellow-300 to-yellow-500">
+            ⚡ Award House Points ⚡
+          </h1>
+          <%= if @current_user do %>
+            <p class="text-xl text-gray-300 mb-4">Greetings, <strong class="text-yellow-400"><%= @current_user.name %></strong>!</p>
+            <div class="bg-gray-800/60 backdrop-blur-sm rounded-lg px-4 py-2 inline-block border border-yellow-600/30">
+              <span class="text-yellow-300">✨ <%= Map.get(assigns, :remaining_points, @daily_limit - @daily_points_given) %> / <%= @daily_limit %> points remaining today ✨</span>
+            </div>
+          <% end %>
+          <p class="text-lg text-gray-400 italic mt-4">"Help will always be given at Hogwarts to those who ask for it."</p>
+        </div>
 
       <div class="grid lg:grid-cols-2 gap-8">
         <!-- Award Form -->
-        <div class="card bg-base-100 shadow-xl">
-          <div class="card-body">
-            <h2 class="card-title text-xl mb-4">🎯 Custom Award</h2>
+        <div class="bg-gray-800/80 backdrop-blur-sm rounded-xl shadow-2xl border border-yellow-600/30">
+          <div class="p-8">
+            <h2 class="text-2xl font-bold mb-6 text-yellow-400 text-center">✨ Award House Points ✨</h2>
 
             <.form for={@form} phx-change="validate" phx-submit="save">
               <%= if @current_user do %>
                 <input type="hidden" name="award[giver_id]" value={@current_user.id} />
                 <div class="form-control mb-4">
                   <label class="label">
-                    <span class="label-text font-semibold">From: <%= @current_user.name %></span>
+                    <span class="label-text font-semibold text-gray-300">From: <span class="text-yellow-400"><%= @current_user.name %></span></span>
                   </label>
                 </div>
               <% else %>
@@ -172,23 +176,23 @@ defmodule HousePointsWeb.AwardLive do
 
               <div class="form-control mb-4">
                 <label class="label">
-                  <span class="label-text font-semibold">To: <span class="text-error">*</span></span>
+                  <span class="label-text font-semibold text-gray-300">To: <span class="text-red-400">*</span></span>
                 </label>
                 <.input field={@form[:receiver_id]} type="select" options={receiver_options(@members, @current_user)} prompt="Select who you're recognizing..." />
               </div>
 
               <div class="form-control mb-4">
                 <label class="label">
-                  <span class="label-text font-semibold">For demonstrating: <span class="text-error">*</span></span>
+                  <span class="label-text font-semibold text-gray-300">For demonstrating: <span class="text-red-400">*</span></span>
                 </label>
                 <.input field={@form[:trait_id]} type="select" options={trait_options(@traits)} prompt="Select a trait..." />
               </div>
 
               <div class="form-control mb-4">
                 <label class="label">
-                  <span class="label-text font-semibold">Points (1-50) <span class="text-error">*</span></span>
+                  <span class="label-text font-semibold text-gray-300">Points (1-50) <span class="text-red-400">*</span></span>
                   <%= if assigns[:show_limit_warning] && @show_limit_warning do %>
-                    <span class="label-text-alt text-warning">⚠️ Exceeds daily limit!</span>
+                    <span class="label-text-alt text-yellow-400">⚠️ Exceeds daily limit!</span>
                   <% end %>
                 </label>
                 <.input field={@form[:points]} type="number" min="1" max="50" placeholder="How many points?" />
@@ -196,15 +200,15 @@ defmodule HousePointsWeb.AwardLive do
 
               <div class="form-control mb-6">
                 <label class="label">
-                  <span class="label-text font-semibold">Why? <span class="text-error">*</span></span>
-                  <span class="label-text-alt">Be specific about what they did!</span>
+                  <span class="label-text font-semibold text-gray-300">Why? <span class="text-red-400">*</span></span>
+                  <span class="label-text-alt text-gray-400">Be specific about what they did!</span>
                 </label>
                 <.input field={@form[:reason]} type="textarea" rows="3" placeholder="Describe what they did that exemplified this trait..." />
               </div>
 
               <div class="form-control">
-                <.button type="submit" disabled={!@changeset.valid? || (assigns[:show_limit_warning] && @show_limit_warning)} class="btn btn-primary btn-lg w-full">
-                  🎉 Award Points
+                <.button type="submit" disabled={!@changeset.valid? || (assigns[:show_limit_warning] && @show_limit_warning)} class="bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 disabled:from-gray-600 disabled:to-gray-500 text-gray-900 font-bold py-3 px-6 rounded-lg w-full transition-all duration-200 shadow-lg hover:shadow-xl disabled:cursor-not-allowed">
+                  ⚡ Cast Award Spell ⚡
                 </.button>
               </div>
             </.form>
@@ -213,10 +217,10 @@ defmodule HousePointsWeb.AwardLive do
 
         <!-- Quick Awards -->
         <div class="space-y-6">
-          <div class="card bg-base-100 shadow-xl">
-            <div class="card-body">
-              <h2 class="card-title text-xl mb-4">⚡ Quick Awards</h2>
-              <p class="text-sm text-base-content/70 mb-4">Click to pre-fill the form with common awards:</p>
+          <div class="bg-gray-800/80 backdrop-blur-sm rounded-xl shadow-2xl border border-purple-600/30">
+            <div class="p-8">
+              <h2 class="text-2xl font-bold mb-4 text-purple-400 text-center">⚡ Quick Spells ⚡</h2>
+              <p class="text-sm text-gray-300 mb-6 text-center">Cast common recognition spells with a single click:</p>
 
               <div class="grid grid-cols-1 gap-3">
                 <%= for {emoji, trait, points, description} <- quick_award_options() do %>
@@ -237,25 +241,28 @@ defmodule HousePointsWeb.AwardLive do
             </div>
           </div>
 
-          <!-- Daily Stats -->
+          <!-- Magical Progress -->
           <%= if @current_user do %>
-            <div class="card bg-gradient-to-r from-primary to-secondary text-primary-content shadow-xl">
-              <div class="card-body">
-                <h3 class="card-title text-lg">📊 Your Daily Progress</h3>
-                <div class="stats stats-vertical bg-transparent text-primary-content">
-                  <div class="stat">
-                    <div class="stat-title text-primary-content/70">Points Given Today</div>
-                    <div class="stat-value text-2xl"><%= @daily_points_given %></div>
+            <div class="bg-gradient-to-br from-indigo-800/80 to-purple-800/80 backdrop-blur-sm rounded-xl shadow-2xl border border-indigo-500/30">
+              <div class="p-6">
+                <h3 class="text-xl font-bold text-indigo-300 text-center mb-4">🔮 Your Magical Progress 🔮</h3>
+                <div class="space-y-4">
+                  <div class="text-center">
+                    <div class="text-indigo-200 text-sm uppercase tracking-wide mb-1">Magic Points Cast Today</div>
+                    <div class="text-3xl font-bold text-indigo-400"><%= @daily_points_given %></div>
                   </div>
-                  <div class="stat">
-                    <div class="stat-title text-primary-content/70">Remaining</div>
-                    <div class="stat-value text-2xl"><%= Map.get(assigns, :remaining_points, @daily_limit - @daily_points_given) %></div>
+                  <div class="text-center">
+                    <div class="text-purple-200 text-sm uppercase tracking-wide mb-1">Spells Remaining</div>
+                    <div class="text-3xl font-bold text-purple-400"><%= Map.get(assigns, :remaining_points, @daily_limit - @daily_points_given) %></div>
+                  </div>
+                  <div class="w-full bg-gray-700 rounded-full h-3 mt-4">
+                    <div class="bg-gradient-to-r from-indigo-500 to-purple-500 h-3 rounded-full transition-all duration-300" style={"width: #{(@daily_points_given / @daily_limit * 100)}%"}></div>
                   </div>
                 </div>
-                <progress class="progress progress-primary bg-primary-content/20" value={@daily_points_given} max={@daily_limit}></progress>
               </div>
             </div>
           <% end %>
+        </div>
         </div>
       </div>
     </div>

@@ -56,6 +56,7 @@ if config_env() == :prod do
   config :house_points, :dns_cluster_query, System.get_env("DNS_CLUSTER_QUERY")
 
   config :house_points, HousePointsWeb.Endpoint,
+    server: true,
     url: [host: host, port: 443, scheme: "https"],
     http: [
       # Enable IPv6 and bind on all interfaces.

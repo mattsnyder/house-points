@@ -1,0 +1,11 @@
+[build]
+  # Use the compile alias for building assets
+  compile = "assets.deploy"
+
+[deploy]
+  # Run database migrations on deploy
+  migration_check_timeout = 1000000
+
+[web]
+  # Use Elixir releases
+  use_release = true

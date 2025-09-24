@@ -79,6 +79,21 @@ defmodule HousePointsWeb.AdminLive do
     {:noreply, socket}
   end
 
+  # Private helper functions
+  defp calculate_diff(old_struct, new_struct) do
+    old_map = Map.from_struct(old_struct) |> Map.drop([:__meta__, :updated_at, :inserted_at])
+    new_map = Map.from_struct(new_struct) |> Map.drop([:__meta__, :updated_at, :inserted_at])
+
+    changes = for {key, new_value} <- new_map,
+                  old_value = Map.get(old_map, key),
+                  old_value != new_value,
+                  into: %{} do
+      {key, %{from: old_value, to: new_value}}
+    end
+
+    %{changes: changes}
+  end
+
   def handle_event("new_house", _params, socket) do
     changeset = Directory.change_house(%House{})
 
@@ -95,7 +110,16 @@ defmodule HousePointsWeb.AdminLive do
     case socket.assigns.editing_item.id do
       nil ->
         case Directory.create_house(house_params) do
-          {:ok, _house} ->
+          {:ok, house} ->
+            # Create audit log
+            Recognition.create_admin_audit_log(
+              "house_created",
+              socket.assigns.current_user,
+              "house",
+              house.id,
+              %{created: house}
+            )
+
             socket =
               socket
               |> put_flash(:info, "House created successfully!")
@@ -109,8 +133,19 @@ defmodule HousePointsWeb.AdminLive do
         end
 
       _id ->
-        case Directory.update_house(socket.assigns.editing_item, house_params) do
-          {:ok, _house} ->
+        old_house = socket.assigns.editing_item
+        case Directory.update_house(old_house, house_params) do
+          {:ok, house} ->
+            # Create audit log
+            diff = calculate_diff(old_house, house)
+            Recognition.create_admin_audit_log(
+              "house_updated",
+              socket.assigns.current_user,
+              "house",
+              house.id,
+              diff
+            )
+
             socket =
               socket
               |> put_flash(:info, "House updated successfully!")
@@ -154,7 +189,16 @@ defmodule HousePointsWeb.AdminLive do
     case socket.assigns.editing_item.id do
       nil ->
         case Directory.create_trait(trait_params) do
-          {:ok, _trait} ->
+          {:ok, trait} ->
+            # Create audit log
+            Recognition.create_admin_audit_log(
+              "trait_created",
+              socket.assigns.current_user,
+              "trait",
+              trait.id,
+              %{created: trait}
+            )
+
             socket =
               socket
               |> put_flash(:info, "Trait created successfully!")
@@ -168,8 +212,19 @@ defmodule HousePointsWeb.AdminLive do
         end
 
       _id ->
-        case Directory.update_trait(socket.assigns.editing_item, trait_params) do
-          {:ok, _trait} ->
+        old_trait = socket.assigns.editing_item
+        case Directory.update_trait(old_trait, trait_params) do
+          {:ok, trait} ->
+            # Create audit log
+            diff = calculate_diff(old_trait, trait)
+            Recognition.create_admin_audit_log(
+              "trait_updated",
+              socket.assigns.current_user,
+              "trait",
+              trait.id,
+              diff
+            )
+
             socket =
               socket
               |> put_flash(:info, "Trait updated successfully!")
@@ -198,8 +253,19 @@ defmodule HousePointsWeb.AdminLive do
   end
 
   def handle_event("save_member", %{"member" => member_params}, socket) do
-    case Directory.update_member(socket.assigns.editing_item, member_params) do
-      {:ok, _member} ->
+    old_member = socket.assigns.editing_item
+    case Directory.update_member(old_member, member_params) do
+      {:ok, member} ->
+        # Create audit log
+        diff = calculate_diff(old_member, member)
+        Recognition.create_admin_audit_log(
+          "member_updated",
+          socket.assigns.current_user,
+          "member",
+          member.id,
+          diff
+        )
+
         socket =
           socket
           |> put_flash(:info, "Member updated successfully!")
@@ -218,6 +284,15 @@ defmodule HousePointsWeb.AdminLive do
       nil ->
         case Recognition.create_rule(rule_params) do
           {:ok, rules} ->
+            # Create audit log
+            Recognition.create_admin_audit_log(
+              "rule_created",
+              socket.assigns.current_user,
+              "rule",
+              rules.id,
+              %{created: rules}
+            )
+
             socket =
               socket
               |> put_flash(:info, "Rules created successfully!")
@@ -233,6 +308,16 @@ defmodule HousePointsWeb.AdminLive do
       rules ->
         case Recognition.update_rule(rules, rule_params) do
           {:ok, updated_rules} ->
+            # Create audit log
+            diff = calculate_diff(rules, updated_rules)
+            Recognition.create_admin_audit_log(
+              "rule_updated",
+              socket.assigns.current_user,
+              "rule",
+              updated_rules.id,
+              diff
+            )
+
             socket =
               socket
               |> put_flash(:info, "Rules updated successfully!")
@@ -665,7 +750,7 @@ defmodule HousePointsWeb.AdminLive do
                 <th class="text-indigo-400">Timestamp</th>
                 <th class="text-indigo-400">Action</th>
                 <th class="text-indigo-400">Actor</th>
-                <th class="text-indigo-400">Award ID</th>
+                <th class="text-indigo-400">Resource</th>
                 <th class="text-indigo-400">Details</th>
               </tr>
             </thead>
@@ -679,7 +764,13 @@ defmodule HousePointsWeb.AdminLive do
                     </span>
                   </td>
                   <td class="text-gray-300"><%= if log.actor, do: log.actor.name, else: "System" %></td>
-                  <td class="text-gray-300">#<%= log.award_id %></td>
+                  <td class="text-gray-300">
+                    <%= if log.award_id do %>
+                      Award #<%= log.award_id %>
+                    <% else %>
+                      <%= String.capitalize(log.resource_type || "unknown") %> #<%= log.resource_id %>
+                    <% end %>
+                  </td>
                   <td class="text-gray-400 text-sm">
                     <%= if log.diff do %>
                       <details class="cursor-pointer">
@@ -897,10 +988,29 @@ defmodule HousePointsWeb.AdminLive do
   defp action_badge_class("award_created"), do: "bg-green-800 text-green-300"
   defp action_badge_class("award_revoked"), do: "bg-red-800 text-red-300"
   defp action_badge_class("award_updated"), do: "bg-blue-800 text-blue-300"
+  defp action_badge_class("house_created"), do: "bg-purple-800 text-purple-300"
+  defp action_badge_class("house_updated"), do: "bg-purple-700 text-purple-300"
+  defp action_badge_class("house_deleted"), do: "bg-red-900 text-red-300"
+  defp action_badge_class("trait_created"), do: "bg-indigo-800 text-indigo-300"
+  defp action_badge_class("trait_updated"), do: "bg-indigo-700 text-indigo-300"
+  defp action_badge_class("trait_deleted"), do: "bg-red-900 text-red-300"
+  defp action_badge_class("member_updated"), do: "bg-teal-800 text-teal-300"
+  defp action_badge_class("rule_created"), do: "bg-yellow-800 text-yellow-300"
+  defp action_badge_class("rule_updated"), do: "bg-yellow-700 text-yellow-300"
   defp action_badge_class(_), do: "bg-gray-800 text-gray-300"
 
-  defp format_action("award_created"), do: "✅ Created"
-  defp format_action("award_revoked"), do: "❌ Revoked"
-  defp format_action("award_updated"), do: "✏️ Updated"
+  defp format_action("award_created"), do: "✅ Award Created"
+  defp format_action("award_revoked"), do: "❌ Award Revoked"
+  defp format_action("award_updated"), do: "✏️ Award Updated"
+  defp format_action("house_created"), do: "🏠 House Created"
+  defp format_action("house_updated"), do: "🏠 House Updated"
+  defp format_action("house_deleted"), do: "🏠 House Deleted"
+  defp format_action("trait_created"), do: "✨ Trait Created"
+  defp format_action("trait_updated"), do: "✨ Trait Updated"
+  defp format_action("trait_deleted"), do: "✨ Trait Deleted"
+  defp format_action("member_updated"), do: "👤 Member Updated"
+  defp format_action("rule_created"), do: "📋 Rule Created"
+  defp format_action("rule_updated"), do: "📋 Rule Updated"
   defp format_action(action), do: action
+
 end

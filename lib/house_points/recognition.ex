@@ -175,6 +175,21 @@ defmodule HousePoints.Recognition do
     |> Repo.all()
   end
 
+  @doc """
+  Creates an admin audit log entry.
+  """
+  def create_admin_audit_log(action, actor, resource_type, resource_id, diff \\ nil) do
+    %AuditLog{}
+    |> AuditLog.changeset(%{
+      action: action,
+      actor_id: actor.id,
+      resource_type: resource_type,
+      resource_id: resource_id,
+      diff: diff
+    })
+    |> Repo.insert()
+  end
+
   # Private functions
 
   defp validate_not_self_award(%{id: id}, %{id: id}), do: {:error, :self_award_not_allowed}

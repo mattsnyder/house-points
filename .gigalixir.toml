@@ -5,6 +5,7 @@
 [deploy]
   # Run database migrations on deploy
   migration_check_timeout = 1000000
+  run_migrate = true
 
 [web]
   # Use Elixir releases

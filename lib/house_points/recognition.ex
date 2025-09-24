@@ -126,6 +126,55 @@ defmodule HousePoints.Recognition do
     Repo.one(from r in Rule, order_by: [desc: r.inserted_at], limit: 1)
   end
 
+  @doc """
+  Creates new rules.
+  """
+  def create_rule(attrs \\ %{}) do
+    %Rule{}
+    |> Rule.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates existing rules.
+  """
+  def update_rule(%Rule{} = rule, attrs) do
+    rule
+    |> Rule.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Returns a changeset for tracking rule changes.
+  """
+  def change_rule(%Rule{} = rule, attrs \\ %{}) do
+    Rule.changeset(rule, attrs)
+  end
+
+  @doc """
+  Gets recent audit logs with preloaded associations.
+  """
+  def list_audit_logs(limit \\ 50) do
+    from(al in AuditLog,
+      order_by: [desc: al.inserted_at],
+      limit: ^limit,
+      preload: [:actor, :award]
+    )
+    |> Repo.all()
+  end
+
+  @doc """
+  Gets audit logs for a specific award.
+  """
+  def list_audit_logs_for_award(award_id) do
+    from(al in AuditLog,
+      where: al.award_id == ^award_id,
+      order_by: [desc: al.inserted_at],
+      preload: [:actor, :award]
+    )
+    |> Repo.all()
+  end
+
   # Private functions
 
   defp validate_not_self_award(%{id: id}, %{id: id}), do: {:error, :self_award_not_allowed}

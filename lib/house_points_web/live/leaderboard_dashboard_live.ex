@@ -64,21 +64,21 @@ defmodule HousePointsWeb.LeaderboardDashboardLive do
                 phx-value-tab="houses"
                 class={"px-6 py-3 rounded-lg font-semibold transition-all duration-200 #{if @tab == "houses", do: "bg-yellow-600 text-gray-900 shadow-lg", else: "text-gray-300 hover:text-yellow-400 hover:bg-gray-700/50"}"}
               >
-                Houses
+                Leaderboard
               </button>
               <button
                 phx-click="switch_tab"
                 phx-value-tab="recent"
                 class={"px-6 py-3 rounded-lg font-semibold transition-all duration-200 #{if @tab == "recent", do: "bg-purple-600 text-white shadow-lg", else: "text-gray-300 hover:text-purple-400 hover:bg-gray-700/50"}"}
               >
-                Recent Awards
+                Recent Activity
               </button>
               <button
                 phx-click="switch_tab"
                 phx-value-tab="traits"
                 class={"px-6 py-3 rounded-lg font-semibold transition-all duration-200 #{if @tab == "traits", do: "bg-blue-600 text-white shadow-lg", else: "text-gray-300 hover:text-blue-400 hover:bg-gray-700/50"}"}
               >
-                Traits
+                Points By Trait
               </button>
             </div>
           </div>
@@ -280,7 +280,7 @@ defmodule HousePointsWeb.LeaderboardDashboardLive do
           <div class="bg-gray-800/80 backdrop-blur-sm rounded-xl shadow-2xl border border-yellow-600/30">
             <div class="p-8">
               <h2 class="text-3xl font-bold mb-8 text-center text-yellow-400">
-                Recent Awards
+                Activity Feed
               </h2>
               <%= if length(@recent_awards || []) > 0 do %>
                 <div class="space-y-4">

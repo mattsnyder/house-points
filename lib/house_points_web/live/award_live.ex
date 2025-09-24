@@ -230,9 +230,9 @@ defmodule HousePointsWeb.AwardLive do
                     phx-value-points={points}
                     class={"btn btn-outline text-left justify-start #{if assigns[:quick_award_selected] == trait, do: "btn-active"}"}
                   >
-                    <div class="w-10 h-10 mr-3 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+                    <!--div class="w-10 h-10 mr-3 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold">
                       <%= letter %>
-                    </div>
+                    </div-->
                     <div class="text-left">
                       <div class="font-semibold"><%= trait %> (<%= points %>pts)</div>
                       <div class="text-xs opacity-70"><%= description %></div>

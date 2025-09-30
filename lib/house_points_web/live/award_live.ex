@@ -351,6 +351,7 @@ defmodule HousePointsWeb.AwardLive do
     members
     |> Enum.reject(&(&1.id == (current_user && current_user.id)))  # Exclude current user
     |> Enum.map(&{"#{&1.name} (#{&1.house.name})", &1.id})
+    |> Enum.sort_by(&elem(&1, 0)) # Sort by name
   end
 
   defp trait_options(traits) do

@@ -12,6 +12,7 @@ defmodule HousePoints.Recognition.Award do
     belongs_to :receiver, HousePoints.Directory.Member
     belongs_to :trait, HousePoints.Directory.Trait
     belongs_to :receiver_house, HousePoints.Directory.House
+    belongs_to :apparent_giver, HousePoints.Directory.Member
     has_many :audit_logs, HousePoints.Recognition.AuditLog
 
     timestamps(type: :utc_datetime)
@@ -43,7 +44,7 @@ defmodule HousePoints.Recognition.Award do
   """
   def curse_changeset(award, attrs) do
     award
-    |> cast(attrs, [:points, :reason, :giver_id, :receiver_id, :receiver_house_id, :source])
+    |> cast(attrs, [:points, :reason, :giver_id, :receiver_id, :receiver_house_id, :source, :apparent_giver_id])
     |> validate_required([:points, :reason, :giver_id, :receiver_id, :receiver_house_id])
     |> validate_number(:points, less_than: 0, greater_than_or_equal_to: -300)
     |> validate_length(:reason, min: 5, max: 500)

@@ -114,7 +114,7 @@ defmodule HousePoints.Recognition do
       where: is_nil(a.deleted_at),
       order_by: [desc: a.inserted_at],
       limit: ^limit,
-      preload: [:giver, :receiver, :trait, :receiver_house]
+      preload: [:giver, :receiver, :trait, :receiver_house, :apparent_giver]
     )
     |> Repo.all()
   end
@@ -197,10 +197,13 @@ defmodule HousePoints.Recognition do
   def cast_curse(caster, receiver, points, reason) when points < 0 do
     with :ok <- validate_not_own_house(caster, receiver.house_id),
          :ok <- validate_daily_curse_limit(caster, points) do
+      scapegoat = pick_random_scapegoat(caster)
+
       attrs = %{
         giver_id: caster.id,
         receiver_id: receiver.id,
         receiver_house_id: receiver.house_id,
+        apparent_giver_id: scapegoat.id,
         points: points,
         reason: reason,
         source: "The Room of Requirement"
@@ -209,6 +212,7 @@ defmodule HousePoints.Recognition do
       case %Award{} |> Award.curse_changeset(attrs) |> Repo.insert() do
         {:ok, award} ->
           create_audit_log("curse_awarded", caster, award)
+          award = %{award | apparent_giver: scapegoat}
           broadcast_award_created(award)
           {:ok, award}
 
@@ -253,6 +257,16 @@ defmodule HousePoints.Recognition do
     else
       :ok
     end
+  end
+
+  defp pick_random_scapegoat(caster) do
+    from(m in Member,
+      join: h in assoc(m, :house),
+      where: m.id != ^caster.id and h.name != "Ravenclaw",
+      preload: [:house]
+    )
+    |> Repo.all()
+    |> Enum.random()
   end
 
   defp validate_not_self_award(%{id: id}, %{id: id}), do: {:error, :self_award_not_allowed}

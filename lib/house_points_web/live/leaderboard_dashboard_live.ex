@@ -297,7 +297,7 @@ defmodule HousePointsWeb.LeaderboardDashboardLive do
                           <!-- Award Info -->
                           <div class="flex-1">
                             <div class="flex items-center space-x-2 mb-1">
-                              <span class="text-gray-300 font-medium"><%= award.giver.name %></span>
+                              <span class="text-gray-300 font-medium"><%= if award.apparent_giver, do: award.apparent_giver.name, else: award.giver.name %></span>
                               <span class="text-gray-400"><%= if award.points < 0, do: "hexed", else: "awarded" %></span>
                               <span class={"font-bold #{house_text_color(award.receiver_house.name)}"}><%= award.receiver.name %></span>
                             </div>

@@ -77,11 +77,12 @@ defmodule HousePointsWeb.RoomOfRequirementLive do
 
     if receiver do
       case Recognition.cast_curse(current_user, receiver, points, curse_params["reason"]) do
-        {:ok, _award} ->
+        {:ok, award} ->
           curse_points_used = Recognition.daily_curse_points_used(current_user)
           remaining = @daily_curse_limit - curse_points_used
 
           changeset = Award.curse_form_changeset(%Award{}, %{})
+          scapegoat_name = award.apparent_giver.name
 
           socket =
             socket
@@ -90,7 +91,7 @@ defmodule HousePointsWeb.RoomOfRequirementLive do
             |> assign(:curse_points_used, curse_points_used)
             |> assign(:remaining_curse_points, remaining)
             |> assign(:cast_success, true)
-            |> put_flash(:info, "The deed is done. Speak of this to no one.")
+            |> put_flash(:info, "The deed is done. #{scapegoat_name} will take the blame.")
 
           {:noreply, socket}
 

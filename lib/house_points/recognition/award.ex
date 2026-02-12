@@ -6,6 +6,7 @@ defmodule HousePoints.Recognition.Award do
     field :points, :integer
     field :reason, :string
     field :deleted_at, :utc_datetime
+    field :source, :string
 
     belongs_to :giver, HousePoints.Directory.Member
     belongs_to :receiver, HousePoints.Directory.Member
@@ -34,6 +35,28 @@ defmodule HousePoints.Recognition.Award do
     |> cast(attrs, [:points, :reason, :giver_id, :receiver_id, :trait_id])
     |> validate_required([:points, :reason, :giver_id, :receiver_id, :trait_id])
     |> validate_number(:points, greater_than: 0, less_than_or_equal_to: 50)
+    |> validate_length(:reason, min: 5, max: 500)
+  end
+
+  @doc """
+  Changeset for curse awards (negative points) from the Room of Requirement.
+  """
+  def curse_changeset(award, attrs) do
+    award
+    |> cast(attrs, [:points, :reason, :giver_id, :receiver_id, :receiver_house_id, :source])
+    |> validate_required([:points, :reason, :giver_id, :receiver_id, :receiver_house_id])
+    |> validate_number(:points, less_than: 0, greater_than_or_equal_to: -300)
+    |> validate_length(:reason, min: 5, max: 500)
+  end
+
+  @doc """
+  Changeset for curse form validation (client-side).
+  """
+  def curse_form_changeset(award, attrs) do
+    award
+    |> cast(attrs, [:points, :reason, :receiver_id])
+    |> validate_required([:points, :reason, :receiver_id])
+    |> validate_number(:points, less_than: 0, greater_than_or_equal_to: -300)
     |> validate_length(:reason, min: 5, max: 500)
   end
 end

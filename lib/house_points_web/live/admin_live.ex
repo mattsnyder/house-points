@@ -997,6 +997,7 @@ defmodule HousePointsWeb.AdminLive do
   defp action_badge_class("member_updated"), do: "bg-teal-800 text-teal-300"
   defp action_badge_class("rule_created"), do: "bg-yellow-800 text-yellow-300"
   defp action_badge_class("rule_updated"), do: "bg-yellow-700 text-yellow-300"
+  defp action_badge_class("curse_awarded"), do: "bg-indigo-900 text-indigo-300"
   defp action_badge_class(_), do: "bg-gray-800 text-gray-300"
 
   defp format_action("award_created"), do: "✅ Award Created"
@@ -1011,6 +1012,7 @@ defmodule HousePointsWeb.AdminLive do
   defp format_action("member_updated"), do: "👤 Member Updated"
   defp format_action("rule_created"), do: "📋 Rule Created"
   defp format_action("rule_updated"), do: "📋 Rule Updated"
+  defp format_action("curse_awarded"), do: "🔮 Curse Cast"
   defp format_action(action), do: action
 
 end

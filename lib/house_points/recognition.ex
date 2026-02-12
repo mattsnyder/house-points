@@ -190,7 +190,70 @@ defmodule HousePoints.Recognition do
     |> Repo.insert()
   end
 
+  @doc """
+  Casts a curse (negative points) on a member's house from the Room of Requirement.
+  Only available to Ravenclaw members. Enforces a daily limit of -300 points.
+  """
+  def cast_curse(caster, receiver, points, reason) when points < 0 do
+    with :ok <- validate_not_own_house(caster, receiver.house_id),
+         :ok <- validate_daily_curse_limit(caster, points) do
+      attrs = %{
+        giver_id: caster.id,
+        receiver_id: receiver.id,
+        receiver_house_id: receiver.house_id,
+        points: points,
+        reason: reason,
+        source: "The Room of Requirement"
+      }
+
+      case %Award{} |> Award.curse_changeset(attrs) |> Repo.insert() do
+        {:ok, award} ->
+          create_audit_log("curse_awarded", caster, award)
+          broadcast_award_created(award)
+          {:ok, award}
+
+        {:error, changeset} ->
+          {:error, changeset}
+      end
+    end
+  end
+
+  @doc """
+  Gets the total curse points a caster has used today.
+  """
+  def daily_curse_points_used(caster) do
+    today = Date.utc_today()
+    start_of_day = DateTime.new!(today, ~T[00:00:00])
+
+    from(a in Award,
+      where: a.giver_id == ^caster.id and
+             a.inserted_at >= ^start_of_day and
+             a.source == "The Room of Requirement" and
+             is_nil(a.deleted_at),
+      select: sum(a.points)
+    )
+    |> Repo.one() || 0
+  end
+
   # Private functions
+
+  defp validate_not_own_house(caster, target_house_id) do
+    if caster.house_id == target_house_id do
+      {:error, :cannot_curse_own_house}
+    else
+      :ok
+    end
+  end
+
+  defp validate_daily_curse_limit(caster, points) do
+    used = daily_curse_points_used(caster)
+    # used is negative or 0, points is negative
+    if used + points < -300 do
+      {:error, :daily_curse_limit_exceeded}
+    else
+      :ok
+    end
+  end
 
   defp validate_not_self_award(%{id: id}, %{id: id}), do: {:error, :self_award_not_allowed}
   defp validate_not_self_award(_giver, _receiver), do: :ok

@@ -40,6 +40,21 @@ defmodule HousePointsWeb.AuthPlug do
     {:cont, socket}
   end
 
+  def on_mount(:require_ravenclaw, _params, session, socket) do
+    socket = assign_current_user(socket, session)
+
+    case socket.assigns.current_user do
+      nil ->
+        {:halt, redirect(socket, to: "/auth")}
+
+      %{house: %{name: "Ravenclaw"}} ->
+        {:cont, socket}
+
+      _other ->
+        {:halt, redirect(socket, external: "https://www.harrypotter.com/features/everything-you-need-to-know-about-the-room-of-requirement")}
+    end
+  end
+
   defp assign_current_user(socket, session) do
     case session["current_user_id"] do
       nil ->

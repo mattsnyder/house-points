@@ -32,6 +32,8 @@ defmodule HousePointsWeb.Router do
     live "/award", AwardLive, :index
     live "/recap", RecapLive, :index
 
+    live "/room-of-requirement", RoomOfRequirementLive, :index
+
     # Admin routes
     live "/admin", AdminLive, :index
     live "/admin/houses", AdminLive, :houses

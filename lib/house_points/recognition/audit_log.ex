@@ -24,7 +24,8 @@ defmodule HousePoints.Recognition.AuditLog do
       "house_created", "house_updated", "house_deleted",
       "trait_created", "trait_updated", "trait_deleted",
       "member_updated",
-      "rule_created", "rule_updated"
+      "rule_created", "rule_updated",
+      "curse_awarded"
     ])
   end
 end

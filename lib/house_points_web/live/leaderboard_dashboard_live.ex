@@ -298,13 +298,13 @@ defmodule HousePointsWeb.LeaderboardDashboardLive do
                           <div class="flex-1">
                             <div class="flex items-center space-x-2 mb-1">
                               <span class="text-gray-300 font-medium"><%= award.giver.name %></span>
-                              <span class="text-gray-400">awarded</span>
+                              <span class="text-gray-400"><%= if award.points < 0, do: "hexed", else: "awarded" %></span>
                               <span class={"font-bold #{house_text_color(award.receiver_house.name)}"}><%= award.receiver.name %></span>
                             </div>
                             <div class="text-sm text-gray-400 mb-2">
                               <span class="font-semibold text-purple-400"><%= award.points %> points</span>
                               <span class="mx-2">•</span>
-                              <span class="text-blue-400"><%= award.trait.name %></span>
+                              <span class="text-blue-400"><%= if award.trait, do: award.trait.name, else: "Curse" %></span>
                             </div>
                             <div class="text-sm text-gray-300 italic">
                               "<%= award.reason %>"
@@ -314,8 +314,8 @@ defmodule HousePointsWeb.LeaderboardDashboardLive do
 
                         <!-- Timestamp and Points -->
                         <div class="text-right">
-                          <div class={"text-2xl font-bold #{house_text_color(award.receiver_house.name)} mb-1"}>
-                            +<%= award.points %>
+                          <div class={"text-2xl font-bold #{if award.points < 0, do: "text-red-400", else: house_text_color(award.receiver_house.name)} mb-1"}>
+                            <%= if award.points > 0, do: "+#{award.points}", else: award.points %>
                           </div>
                           <div class="text-xs text-gray-400">
                             <%= format_time_ago(award.inserted_at) %>

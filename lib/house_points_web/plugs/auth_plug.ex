@@ -6,7 +6,7 @@ defmodule HousePointsWeb.AuthPlug do
   import Phoenix.Component
   import Phoenix.LiveView
 
-  alias HousePoints.{Auth, Repo}
+  alias HousePoints.{Auth, Recognition, Repo}
   alias HousePoints.Directory.Member
 
   def on_mount(:require_authenticated_user, _params, session, socket) do
@@ -40,19 +40,32 @@ defmodule HousePointsWeb.AuthPlug do
     {:cont, socket}
   end
 
-  def on_mount(:require_ravenclaw, _params, session, socket) do
+  def on_mount(:require_underdog, _params, session, socket) do
     socket = assign_current_user(socket, session)
 
     case socket.assigns.current_user do
       nil ->
         {:halt, redirect(socket, to: "/auth")}
 
-      %{house: %{name: "Ravenclaw"}} ->
-        {:cont, socket}
+      %{house_id: house_id} when not is_nil(house_id) ->
+        top_two_house_ids = top_house_ids(2)
+
+        if house_id in top_two_house_ids do
+          {:halt, redirect(socket, external: "https://www.harrypotter.com/features/everything-you-need-to-know-about-the-room-of-requirement")}
+        else
+          {:cont, socket}
+        end
 
       _other ->
-        {:halt, redirect(socket, external: "https://www.harrypotter.com/features/everything-you-need-to-know-about-the-room-of-requirement")}
+        {:halt, redirect(socket, to: "/auth")}
     end
+  end
+
+  defp top_house_ids(count) do
+    Recognition.totals_by_house()
+    |> Enum.sort_by(& &1.total_points, :desc)
+    |> Enum.take(count)
+    |> Enum.map(& &1.house_id)
   end
 
   defp assign_current_user(socket, session) do

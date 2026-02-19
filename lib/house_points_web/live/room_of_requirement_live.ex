@@ -4,7 +4,7 @@ defmodule HousePointsWeb.RoomOfRequirementLive do
   alias HousePoints.{Recognition, Directory}
   alias HousePoints.Recognition.Award
 
-  on_mount {HousePointsWeb.AuthPlug, :require_ravenclaw}
+  on_mount {HousePointsWeb.AuthPlug, :require_underdog}
 
   @daily_curse_limit -300
 

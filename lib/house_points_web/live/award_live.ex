@@ -20,7 +20,7 @@ defmodule HousePointsWeb.AwardLive do
       socket
       |> assign(:changeset, changeset)
       |> assign(:form, to_form(changeset))
-      |> assign(:members, Directory.list_members())
+      |> assign(:members, Directory.list_active_members())
       |> assign(:traits, Directory.list_traits())
       |> assign(:daily_points_given, daily_points_given)
       |> assign(:daily_limit, daily_limit)

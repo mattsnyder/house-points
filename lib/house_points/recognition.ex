@@ -262,7 +262,7 @@ defmodule HousePoints.Recognition do
   defp pick_random_scapegoat(caster) do
     from(m in Member,
       join: h in assoc(m, :house),
-      where: m.id != ^caster.id and h.name != "Ravenclaw",
+      where: m.id != ^caster.id and h.name != "Ravenclaw" and m.is_active == true,
       preload: [:house]
     )
     |> Repo.all()

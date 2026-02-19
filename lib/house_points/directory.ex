@@ -63,6 +63,13 @@ defmodule HousePoints.Directory do
   end
 
   @doc """
+  Returns the list of active members with their houses preloaded.
+  """
+  def list_active_members do
+    Repo.all(from m in Member, where: m.is_active == true, preload: [:house])
+  end
+
+  @doc """
   Returns the list of members for a specific house.
   """
   def list_members_by_house(house_id) do

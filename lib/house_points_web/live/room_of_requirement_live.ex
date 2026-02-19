@@ -11,7 +11,7 @@ defmodule HousePointsWeb.RoomOfRequirementLive do
   @impl true
   def mount(_params, _session, socket) do
     current_user = socket.assigns.current_user
-    members = Directory.list_members()
+    members = Directory.list_active_members()
     curse_points_used = Recognition.daily_curse_points_used(current_user)
     remaining = @daily_curse_limit - curse_points_used
 
